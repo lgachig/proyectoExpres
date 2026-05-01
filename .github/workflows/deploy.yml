@@ -1,0 +1,31 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: develop
+
+    steps:
+      - name: Descargar repo
+        uses: actions/checkout@v4
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Backend
+        run: |
+          docker build -t lgachig/proyectoexpress-backend ./backend
+          docker push lgachig/proyectoexpress-backend
+
+      - name: Build Frontend
+        run: |
+          docker build -t lgachig/proyectoexpress-frontend ./frontend
+          docker push lgachig/proyectoexpress-frontend
