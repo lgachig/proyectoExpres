@@ -22,10 +22,10 @@ jobs:
 
       - name: Build Backend
         run: |
-          docker build -t lgachig/proyectoexpress-backend ./backend
+          docker build -t lgachig/proyectoexpress-backend ./apps/backend
           docker push lgachig/proyectoexpress-backend
 
       - name: Build Frontend
         run: |
-          docker build -t lgachig/proyectoexpress-frontend ./frontend
+          docker build -t lgachig/proyectoexpress-frontend ./apps/frontend
           docker push lgachig/proyectoexpress-frontend
