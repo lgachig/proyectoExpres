@@ -7,6 +7,7 @@ async function bootstrap() {
   const corsOrigin = getRequiredEnv('CORS_ORIGIN');
   app.enableCors({
     origin: corsOrigin,
+    'http://localhost:5173': 'http://34.238.172.135:5173',
   });
   await app.listen(getRequiredEnvNumber('PORT'));
 }

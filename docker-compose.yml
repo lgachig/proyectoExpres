@@ -26,31 +26,31 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ./apps/backend
     container_name: escuela_backend
     depends_on:
       db:
         condition: service_healthy
     env_file:
-      - ./backend/.env
+      - ./apps/backend/.env
     ports:
       - '3000:3000'
     volumes:
-      - ./backend:/app
+      - ./apps/backend:/app
       - /app/node_modules
 
   frontend:
     build:
-      context: ./frontend
+      context: ./apps/frontend
     container_name: escuela_frontend
     depends_on:
       - backend
     env_file:
-      - ./frontend/.env
+      - ./apps/frontend/.env
     ports:
       - '5173:5173'
     volumes:
-      - ./frontend:/app
+      - ./apps/frontend:/app
       - /app/node_modules
 
 volumes:
