@@ -1,4 +1,4 @@
-name: CD Pipeline
+name: CD Pipelines
 
 on:
   push:
@@ -29,3 +29,4 @@ jobs:
         run: |
           docker build -t lgachig/proyectoexpress-frontend ./apps/frontend
           docker push lgachig/proyectoexpress-frontend
+
