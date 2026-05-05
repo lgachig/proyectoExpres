@@ -30,3 +30,26 @@ jobs:
           docker build -t lgachig/proyectoexpress-frontend ./apps/frontend
           docker push lgachig/proyectoexpress-frontend
 
+      - name: Deploy Backend en EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST_BACKEND }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull lgachig/proyectoexpress-backend
+            docker stop backend || true
+            docker rm backend || true
+            docker run -d -p 3000:3000 --name backend lgachig/proyectoexpress-backend
+
+      - name: Deploy Frontend en EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST_FRONTEND }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull lgachig/proyectoexpress-frontend
+            docker stop frontend || true
+            docker rm frontend || true
+            docker run -d -p 5173:5173 --name frontend lgachig/proyectoexpress-frontend
