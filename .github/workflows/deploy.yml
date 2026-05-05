@@ -27,7 +27,11 @@ jobs:
 
       - name: Build Frontend
         run: |
-          docker build -t lgachig/proyectoexpress-frontend ./apps/frontend
+          docker build \
+            --build-arg VITE_API_BASE_URL=http://${{ secrets.EC2_HOST_BACKEND }}:3000 \
+            --build-arg VITE_DOG_INITIAL_PAGE=2 \
+            --build-arg VITE_DOG_PAGE_SIZE=2 \
+            -t lgachig/proyectoexpress-frontend ./apps/frontend
           docker push lgachig/proyectoexpress-frontend
 
       - name: Deploy Backend en EC2
@@ -40,7 +44,18 @@ jobs:
             docker pull lgachig/proyectoexpress-backend
             docker stop backend || true
             docker rm backend || true
-            docker run -d -p 3000:3000 --name backend lgachig/proyectoexpress-backend
+            docker run -d -p 3000:3000 \
+              -e PORT=3000 \
+              -e CORS_ORIGIN=http://${{ secrets.EC2_HOST_FRONTEND }}:5173 \
+              -e DB_HOST=localhost \
+              -e DB_PORT=5432 \
+              -e DB_USER=admin \
+              -e DB_PASSWORD=admin \
+              -e DB_NAME=escuela_db \
+              -e DOG_API_BASE_URL=https://dogapi.dog/api/v2 \
+              -e DOG_API_BREEDS_PATH=/breeds \
+              --name backend \
+              lgachig/proyectoexpress-backend
 
       - name: Deploy Frontend en EC2
         uses: appleboy/ssh-action@v1.0.0
@@ -52,4 +67,6 @@ jobs:
             docker pull lgachig/proyectoexpress-frontend
             docker stop frontend || true
             docker rm frontend || true
-            docker run -d -p 5173:5173 --name frontend lgachig/proyectoexpress-frontend
+            docker run -d -p 5173:5173 \
+              --name frontend \
+              lgachig/proyectoexpress-frontend
