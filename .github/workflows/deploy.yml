@@ -41,13 +41,27 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            docker network create escuela-net || true
+            docker pull postgres:15-alpine
+            docker stop db || true
+            docker rm db || true
+            docker run -d \
+              --name db \
+              --network escuela-net \
+              -e POSTGRES_USER=admin \
+              -e POSTGRES_PASSWORD=admin \
+              -e POSTGRES_DB=escuela_db \
+              -p 5432:5432 \
+              postgres:15-alpine
+
             docker pull lgachig/proyectoexpress-backend
             docker stop backend || true
             docker rm backend || true
             docker run -d -p 3000:3000 \
+              --network escuela-net \
               -e PORT=3000 \
               -e CORS_ORIGIN=http://${{ secrets.EC2_HOST_FRONTEND }}:5173 \
-              -e DB_HOST=localhost \
+              -e DB_HOST=db \
               -e DB_PORT=5432 \
               -e DB_USER=admin \
               -e DB_PASSWORD=admin \
