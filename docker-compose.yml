@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: escuela_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: escuela_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - '5433:5433'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U admin -d escuela_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    container_name: escuela_adminer
+    depends_on:
+      - db
+    ports:
+      - '8080:8080'
+
+  backend:
+    build:
+      context: ./apps/backend
+    container_name: escuela_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./apps/backend/.env
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./apps/backend:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: ./apps/frontend
+    container_name: escuela_frontend
+    depends_on:
+      - backend
+    env_file:
+      - ./apps/frontend/.env
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./apps/frontend:/app
+      - /app/node_modules
+
+volumes:
+  db_data:

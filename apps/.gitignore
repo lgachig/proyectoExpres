@@ -1,0 +1,20 @@
+# dependencies
+**/node_modules
+
+# build outputs
+**/dist
+**/coverage
+
+# logs
+*.log
+npm-debug.log*
+
+# env files
+.env
+.env.*
+
+# vscode
+.vscode/
+
+# misc
+.DS_Store
