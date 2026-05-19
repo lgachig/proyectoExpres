@@ -129,7 +129,7 @@ docker run -d \
   --network escuela-net \
   -p 3000:3000 \
   -e PORT=3000 \
-  -e CORS_ORIGIN=http://54.167.86.159:5173 \
+  -e CORS_ORIGIN=http://54.242.151.23:5173 \
   -e DB_HOST=db \
   -e DB_PORT=5432 \
   -e DB_USER=admin \
@@ -137,7 +137,7 @@ docker run -d \
   -e DB_NAME=escuela_db \
   -e DOG_API_BASE_URL=https://dogapi.dog/api/v2 \
   -e DOG_API_BREEDS_PATH=/breeds \
-  lgachig/proyectoexpress-backend_test
+  lgachig/proyectoexpress-backend_pro
 
 
 # =========================
@@ -151,10 +151,10 @@ docker rm frontend || true
 docker run -d \
   --name frontend \
   -p 5173:5173 \
-  -e VITE_API_BASE_URL=http://54.167.86.159:3000 \
+  -e VITE_API_BASE_URL=http://54.242.151.23:3000 \
   -e VITE_DOG_INITIAL_PAGE=2 \
   -e VITE_DOG_PAGE_SIZE=2 \
-  lgachig/proyectoexpress-frontend_test
+  lgachig/proyectoexpress-frontend_pro
 
 
 # =========================
