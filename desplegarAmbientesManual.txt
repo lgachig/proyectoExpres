@@ -1,8 +1,8 @@
-# =========================
+=========================
 # 1. CONECTARSE A EC2
 # =========================
-
-ssh -i practicaU.pem ec2-user@100.53.126.92
+chmod 400 practicaUPro.pem
+ssh -i practicaUPro.pem ec2-user@54.221.53.102
 
 
 # =========================
@@ -21,7 +21,7 @@ exit
 # 3. VOLVER A ENTRAR
 # =========================
 
-ssh -i practicaU.pem ec2-user@100.53.126.92
+ssh -i practicaUPro.pem ec2-user@54.224.67.60
 
 # =========================
 # 4. VERIFICAR DOCKER
@@ -42,40 +42,43 @@ docker login
 
 cd proyecto
 
-docker build -t lgachig/proyectoexpress-backend_test ./apps/backend
-
+docker buildx build \
+  --platform linux/amd64 \
+  -t lgachig/proyectoexpress-backend_pro \
+  ./apps/backend \
+  --push
 
 # =========================
 # 7. PUSH BACKEND
 # =========================
 
-docker push lgachig/proyectoexpress-backend_test
+docker push lgachig/proyectoexpress-backend_pro
 
 
 # =========================
 # 8. BUILD FRONTEND (LOCAL)
 # =========================
 
-docker build \
-  --build-arg VITE_API_BASE_URL=http://100.53.126.92:3000 \
+docker buildx build \
+  --platform linux/amd64 \
+  --build-arg VITE_API_BASE_URL=http://54.221.53.102:3000 \
   --build-arg VITE_DOG_INITIAL_PAGE=2 \
   --build-arg VITE_DOG_PAGE_SIZE=2 \
-  -t lgachig/proyectoexpress-frontend_test ./apps/frontend
-
+  -t lgachig/proyectoexpress-frontend_pro ./apps/frontend
+  --push
 
 # =========================
 # 9. PUSH FRONTEND
 # =========================
 
-docker push lgachig/proyectoexpress-frontend_test
+docker push lgachig/proyectoexpress-frontend_pro
 
 
 # =========================
 # 10. VOLVER A EC2
 # =========================
 
-ssh -i practicaU.pem ec2-user@100.53.126.92
-
+ssh -i practicaUPro.pem ec2-user@54.224.67.60
 
 # =========================
 # 11. CREAR NETWORK
@@ -90,9 +93,9 @@ docker network create escuela-net || true
 
 docker pull postgres:15-alpine
 
-docker pull lgachig/proyectoexpress-backend_test
+docker pull lgachig/proyectoexpress-backend_pro
 
-docker pull lgachig/proyectoexpress-frontend_test
+docker pull lgachig/proyectoexpress-frontend_pro
 
 
 # =========================
@@ -126,7 +129,7 @@ docker run -d \
   --network escuela-net \
   -p 3000:3000 \
   -e PORT=3000 \
-  -e CORS_ORIGIN=http://100.53.126.92:5173 \
+  -e CORS_ORIGIN=http://54.167.86.159:5173 \
   -e DB_HOST=db \
   -e DB_PORT=5432 \
   -e DB_USER=admin \
@@ -148,7 +151,7 @@ docker rm frontend || true
 docker run -d \
   --name frontend \
   -p 5173:5173 \
-  -e VITE_API_BASE_URL=http://100.53.126.92:3000 \
+  -e VITE_API_BASE_URL=http://54.167.86.159:3000 \
   -e VITE_DOG_INITIAL_PAGE=2 \
   -e VITE_DOG_PAGE_SIZE=2 \
   lgachig/proyectoexpress-frontend_test
@@ -184,7 +187,7 @@ curl http://localhost:3000/alumnos
 # =========================
 
 # FRONTEND
-http://100.53.126.92:5173
+http://54.224.67.60:5173
 
 # BACKEND
-http://100.53.126.92:3000/alumnos
+http://54.224.67.60:3000/alumnos
