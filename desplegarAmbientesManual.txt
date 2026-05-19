@@ -1,0 +1,193 @@
+=========================
+# 1. CONECTARSE A EC2
+# =========================
+chmod 400 practicaUPro.pem
+ssh -i practicaUPro.pem ec2-user@54.221.53.102
+
+
+# =========================
+# 2. INSTALAR DOCKER EN EC2
+# =========================
+
+sudo yum update -y
+sudo yum install docker -y
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker ec2-user
+exit
+
+
+# =========================
+# 3. VOLVER A ENTRAR
+# =========================
+
+ssh -i practicaUPro.pem ec2-user@54.224.67.60
+
+# =========================
+# 4. VERIFICAR DOCKER
+# =========================
+docker ps
+
+
+# =========================
+# 5. LOGIN DOCKER HUB (LOCAL)
+# =========================
+
+docker login
+
+
+# =========================
+# 6. BUILD BACKEND (LOCAL)
+# =========================
+
+cd proyecto
+
+docker buildx build \
+  --platform linux/amd64 \
+  -t lgachig/proyectoexpress-backend_pro \
+  ./apps/backend \
+  --push
+
+# =========================
+# 7. PUSH BACKEND
+# =========================
+
+docker push lgachig/proyectoexpress-backend_pro
+
+
+# =========================
+# 8. BUILD FRONTEND (LOCAL)
+# =========================
+
+docker buildx build \
+  --platform linux/amd64 \
+  --build-arg VITE_API_BASE_URL=http://54.221.53.102:3000 \
+  --build-arg VITE_DOG_INITIAL_PAGE=2 \
+  --build-arg VITE_DOG_PAGE_SIZE=2 \
+  -t lgachig/proyectoexpress-frontend_pro ./apps/frontend
+  --push
+
+# =========================
+# 9. PUSH FRONTEND
+# =========================
+
+docker push lgachig/proyectoexpress-frontend_pro
+
+
+# =========================
+# 10. VOLVER A EC2
+# =========================
+
+ssh -i practicaUPro.pem ec2-user@54.224.67.60
+
+# =========================
+# 11. CREAR NETWORK
+# =========================
+
+docker network create escuela-net || true
+
+
+# =========================
+# 12. DESCARGAR IMAGENES
+# =========================
+
+docker pull postgres:15-alpine
+
+docker pull lgachig/proyectoexpress-backend_pro
+
+docker pull lgachig/proyectoexpress-frontend_pro
+
+
+# =========================
+# 13. LEVANTAR POSTGRESQL
+# =========================
+
+docker stop db || true
+
+docker rm db || true
+
+docker run -d \
+  --name db \
+  --network escuela-net \
+  -e POSTGRES_USER=admin \
+  -e POSTGRES_PASSWORD=admin \
+  -e POSTGRES_DB=escuela_db \
+  -p 5432:5432 \
+  postgres:15-alpine
+
+
+# =========================
+# 14. LEVANTAR BACKEND
+# =========================
+
+docker stop backend || true
+
+docker rm backend || true
+
+docker run -d \
+  --name backend \
+  --network escuela-net \
+  -p 3000:3000 \
+  -e PORT=3000 \
+  -e CORS_ORIGIN=http://54.242.151.23:5173 \
+  -e DB_HOST=db \
+  -e DB_PORT=5432 \
+  -e DB_USER=admin \
+  -e DB_PASSWORD=admin \
+  -e DB_NAME=escuela_db \
+  -e DOG_API_BASE_URL=https://dogapi.dog/api/v2 \
+  -e DOG_API_BREEDS_PATH=/breeds \
+  lgachig/proyectoexpress-backend_pro
+
+
+# =========================
+# 15. LEVANTAR FRONTEND
+# =========================
+
+docker stop frontend || true
+
+docker rm frontend || true
+
+docker run -d \
+  --name frontend \
+  -p 5173:5173 \
+  -e VITE_API_BASE_URL=http://54.242.151.23:3000 \
+  -e VITE_DOG_INITIAL_PAGE=2 \
+  -e VITE_DOG_PAGE_SIZE=2 \
+  lgachig/proyectoexpress-frontend_pro
+
+
+# =========================
+# 16. VERIFICAR
+# =========================
+
+docker ps
+
+
+# =========================
+# 17. LOGS
+# =========================
+
+docker logs backend
+
+docker logs frontend
+
+docker logs db
+
+
+# =========================
+# 18. PROBAR BACKEND
+# =========================
+
+curl http://localhost:3000/alumnos
+
+
+# =========================
+# 19. URLS
+# =========================
+
+# FRONTEND
+http://54.224.67.60:5173
+
+# BACKEND
+http://54.224.67.60:3000/alumnos
