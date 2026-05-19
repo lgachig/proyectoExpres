@@ -155,8 +155,8 @@ function App() {
   return (
     <main className="page">
       <section className="card">
-        <p className="eyebrow">Sistema de gestion escolar</p>
-        <h1>CRUD de Alumnos si se pudo 2</h1>
+        <h1 className="eyebrow">Sistema de gestion escolar</h1>
+        <h4>CRUD of Alumnos</h4>
 
         <form className="form" onSubmit={agregarAlumno}>
           <input
