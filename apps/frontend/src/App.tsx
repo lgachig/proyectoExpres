@@ -153,10 +153,10 @@ function App() {
   };
 
   return (
-    <main className="page">
+    <main className="page" style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
       <section className="card">
         <p className="eyebrow">Sistema de gestion escolar</p>
-        <h1>CRUD de Alumnos si se pudo 2</h1>
+        <h1>CRUD of Alumnos</h1>
 
         <form className="form" onSubmit={agregarAlumno}>
           <input
